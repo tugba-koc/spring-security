@@ -70,5 +70,4 @@ public class JwtManager {
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
-    
 }
