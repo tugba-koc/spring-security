@@ -40,8 +40,13 @@ public class AuthenticateManager implements AuthenticationService{
         .role(Role.USER)
         .build();
 
+        // add user to userRepository
         this.userRepository.save(user);
+
+        // create new token for the user
         String jwtToken = this.jwtManager.generateToken(user);
+
+        // return token in response
         return GetAuthenticationResponse.builder()
             .token(jwtToken).build();
     }

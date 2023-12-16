@@ -20,13 +20,13 @@ public class AuthenticationController {
     private AuthenticationService authenticationService;
 
     @PostMapping("/register")
-    /* @CrossOrigin(exposedHeaders = {"Access-Control-Allow-Origin","Access-Control-Allow-Credentials"}) */
+    @CrossOrigin(exposedHeaders = {"Access-Control-Allow-Origin","Access-Control-Allow-Credentials"})
     public ResponseEntity<GetAuthenticationResponse> register(@RequestBody CreateRegisterRequest createRegisterRequest) {
         return ResponseEntity.ok(this.authenticationService.register(createRegisterRequest));
     }
 
     @PostMapping("/authenticate")
-    /* @CrossOrigin(exposedHeaders = {"Access-Control-Allow-Origin","Access-Control-Allow-Credentials"}) */
+    @CrossOrigin(exposedHeaders = {"Access-Control-Allow-Origin","Access-Control-Allow-Credentials"})
     public GetAuthenticationResponse authenticate(@RequestBody CreateAuthenticationRequest createAuthenticationRequest) {
         /* return ResponseEntity.ok(this.authenticationService.authenticate(createAuthenticationRequest)); */
         return this.authenticationService.authenticate(createAuthenticationRequest);
