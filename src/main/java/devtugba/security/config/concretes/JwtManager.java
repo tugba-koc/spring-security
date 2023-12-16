@@ -6,19 +6,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import javax.crypto.SecretKey;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
-
 @Service
 public class JwtManager {
 
-    private static final String SECRET_KEY = "+VWFF3SI1dG3ejmx4f/jRWVF1fvFfcUqiV7xFxHZqLULhC+PA4DrRBHYpSrsuHyq1+21AYsclRbSJuHzSjCYooUKf5iK7BlLIHZ5AJ64N3OjWVVjj8qfs5VTdx0oV1Z/hvIcsWbu911TD7TMQsBN1cgLWaDrC0kekqVsPJK7XCOyuX8NZGzyRL1fXpF+gZqQGtfy0HhN8CVNt74mjITADIG1cVBsL6l4CkCTa6PSuSVyd/bxVB+neTiqGQBPfg14fsSRyfJEq2E0KT3Ka0rOw779xRVQ72qmkuNyRpESGnTqYfg1HZyQYq84leSm6wL3yi71uUiodHTbnI3WI0kyTp02vO7QQS5lxekxMGl8zOU=";
+    private static final SecretKey key = Jwts.SIG.HS256.key().build();
+    private static final String SECRET_KEY = Encoders.BASE64.encode(key.getEncoded());
+
 
     // TO CREATE TOKEN
     public String generateToken(UserDetails userDetails){
@@ -28,11 +31,11 @@ public class JwtManager {
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails){
         return Jwts
         .builder()
-        .setClaims(extraClaims)
-        .setSubject(userDetails.getUsername())
-        .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
-        .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+        .subject(userDetails.getUsername())
+        .signWith(getSignInKey())
+        .issuedAt(new Date(System.currentTimeMillis()))
+        .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+        .claims(extraClaims)
         .compact();
     }
 
@@ -66,10 +69,10 @@ public class JwtManager {
 
     private Claims extractAllClaims(String token){
         return Jwts
-        .parserBuilder()
-        .setSigningKey(getSignInKey())
+        .parser()
+        .verifyWith(key)
         .build()
-        .parseClaimsJws(token)
-        .getBody();
+        .parseSignedClaims(token)
+        .getPayload();
     }
 }
