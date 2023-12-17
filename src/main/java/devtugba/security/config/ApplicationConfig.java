@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import devtugba.security.dataAccess.abstracts.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -23,6 +24,7 @@ public class ApplicationConfig {
     private UserRepository userRepository;
 
     @Bean
+    @Transactional
     public UserDetailsService userDetailsService(){
         return username -> this.userRepository.findByEmail(username)
         .orElseThrow(() -> new UsernameNotFoundException("user not found"));

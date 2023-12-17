@@ -13,6 +13,7 @@ import devtugba.security.config.concretes.JwtManager;
 import devtugba.security.constants.Role;
 import devtugba.security.dataAccess.abstracts.UserRepository;
 import devtugba.security.entities.concretes.User;
+import jakarta.transaction.Transactional;
 
 @Service
 public class AuthenticateManager implements AuthenticationService{
@@ -31,6 +32,7 @@ public class AuthenticateManager implements AuthenticationService{
     }
 
     @Override
+    @Transactional
     public GetAuthenticationResponse register(CreateRegisterRequest createRegisterRequest) {
         User user = User.builder()
         .firstName(createRegisterRequest.getFirstName())
@@ -52,6 +54,7 @@ public class AuthenticateManager implements AuthenticationService{
     }
 
     @Override
+    @Transactional
     public GetAuthenticationResponse authenticate(CreateAuthenticationRequest createAuthenticationRequest) {
         this.authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
