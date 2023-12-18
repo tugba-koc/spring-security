@@ -1,9 +1,11 @@
 package devtugba.security.business.concretes;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import devtugba.security.business.abstracts.AuthenticationService;
 import devtugba.security.business.requests.CreateAuthenticationRequest;
@@ -13,26 +15,19 @@ import devtugba.security.config.concretes.JwtManager;
 import devtugba.security.constants.Role;
 import devtugba.security.dataAccess.abstracts.UserRepository;
 import devtugba.security.entities.concretes.User;
-import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class AuthenticateManager implements AuthenticationService{
 
-    private UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
-    private JwtManager jwtManager;
-    private AuthenticationManager authenticationManager;
-
-
-    public AuthenticateManager(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtManager jwtManager, AuthenticationManager authenticationManager) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtManager = jwtManager;
-        this.authenticationManager = authenticationManager;
-    }
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtManager jwtManager;
+    private final AuthenticationManager authenticationManager;
 
     @Override
-    @Transactional
+    @Transactional(readOnly = false)
     public GetAuthenticationResponse register(CreateRegisterRequest createRegisterRequest) {
         User user = User.builder()
         .firstName(createRegisterRequest.getFirstName())
@@ -54,7 +49,8 @@ public class AuthenticateManager implements AuthenticationService{
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
+    @Cacheable(value = "AuthenticationService::findByEmail", key = "#createAuthenticationRequest.email")
     public GetAuthenticationResponse authenticate(CreateAuthenticationRequest createAuthenticationRequest) {
         this.authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
